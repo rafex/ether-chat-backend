@@ -1,37 +1,92 @@
 # CONVENTIONS.md
 
-Reglas operativas y de implementacion del proyecto.
+Reglas de codigo y organizacion del proyecto.
 
-## Debe cubrir
+## Java
 
-- Naming de archivos, carpetas, funciones y componentes.
-- Convenciones de testing.
-- Convenciones de branching y commits.
-- Convenciones de estructura por feature o capa.
-- Reglas de documentacion y actualizacion de contexto.
+- Java 21: usar records, sealed classes y pattern matching donde aplique.
+- No usar reflexion en codigo de produccion.
+- No usar anotaciones de framework (no `@Component`, `@Inject`, `@Autowired`).
+- Clases utilitarias: constructor privado, metodos estaticos, `final`.
+- Implementaciones de servicios: clase `final` con constructor explicito.
+- Registrar con `java.util.logging` (JUL), no con SLF4J directamente.
+  `ether-http-jetty12` ya configura el bridge SLF4J → JUL.
+- Preferir `Objects.requireNonNull(param, "param")` en constructores.
+- Usar `Optional<T>` solo en retornos de repositorios, no en parametros.
 
-## Template
+## Naming
 
-### Codigo
+| Elemento | Convencion | Ejemplo |
+|----------|-----------|---------|
+| Clases de dominio | PascalCase | `User`, `Conversation`, `Message` |
+| Records de config | PascalCase + sufijo Config | `AppConfig`, `ServerConfig` |
+| Interfaces de puerto | PascalCase sin prefijo I | `UserRepository`, `AiGateway` |
+| Implementaciones de puerto | sufijo Impl | `UserRepositoryImpl` |
+| Handlers HTTP | sufijo Handler | `LoginHandler`, `ChatMessageHandler` |
+| Inicializadores de DB | sufijo Db | `AuthDb`, `ChatDb` |
+| Packages | lowercase, bounded context primero | `dev.rafex.chat.auth.service` |
+| Modulos Maven | kebab-case con prefijo del proyecto | `ether-chat-backend-core` |
+| Variables de entorno | UPPER_SNAKE_CASE | `SERVER_PORT`, `JWT_SECRET` |
 
-- Preferir cambios pequenos y locales.
-- Evitar duplicacion accidental.
-- Seguir la estructura definida en `ARCHITECTURE.md`.
+## Estructura de packages por modulo
 
-### Tests
+```
+modulo-common:
+  dev.rafex.chat.shared.config.*
+  dev.rafex.chat.shared.error.*
 
-- Cada cambio relevante debe definir su estrategia de validacion.
-- Los tests deben vivir cerca del codigo o donde el proyecto lo defina.
+modulo-ports:
+  dev.rafex.chat.auth.port.*
+  dev.rafex.chat.chat.port.*
 
-### Documentacion
+modulo-core:
+  dev.rafex.chat.auth.domain.*
+  dev.rafex.chat.auth.service.*
+  dev.rafex.chat.chat.domain.*
+  dev.rafex.chat.chat.service.*
 
-- Los `README.md` indexan.
-- Los archivos en MAYUSCULAS contienen contexto fuente.
-- No duplicar hechos entre documentos sin una razon fuerte.
+modulo-infra-sqlite:
+  dev.rafex.chat.auth.infra.*
+  dev.rafex.chat.chat.infra.*
 
-### Agentes
+modulo-bootstrap:
+  dev.rafex.chat.bootstrap.*
 
-- Antes de editar, leer el `README.md` de la carpeta.
-- Actualizar el documento fuente si cambia una verdad compartida.
-- No cerrar una tarea sin estado final y evidencia de validacion.
-- No ejecutar una iniciativa sin referencia explicita a una spec.
+modulo-transport-jetty:
+  dev.rafex.chat            (App.java)
+  dev.rafex.chat.server.*
+  dev.rafex.chat.auth.handler.*
+  dev.rafex.chat.chat.handler.*
+```
+
+## Tests
+
+- Un test por clase publica; nombre: `<ClaseTesteada>Test`.
+- Tests unitarios en el mismo modulo que el codigo bajo prueba.
+- Tests de arquitectura en `architecture-tests` con ArchUnit.
+- Cada handler debe tener al menos un test con mock del servicio.
+- Cada servicio debe tener tests que ejerciten los caminos criticos.
+- Tests de repositorio con SQLite real en memoria (`jdbc:sqlite::memory:`).
+
+## Maven
+
+- Cada modulo declara solo sus dependencias directas.
+- Las versiones se gestionan en el `dependencyManagement` del parent.
+- No usar `<scope>compile</scope>` explicito (es el default).
+- `ether-glowroot-jetty12` siempre se declara con `<scope>provided</scope>`
+  en el parent y como runtime dependency en `transport-jetty`.
+
+## Branching y commits
+
+- Rama principal: `main`
+- Feature branches: `feat/<iniciativa>/<descripcion-corta>`
+- Commits: imperativo presente, en ingles o espanol.
+  Ejemplo: `feat: add LoginHandler for POST /api/auth/login`
+- No mezclar refactors con funcionalidad en el mismo commit.
+
+## Documentacion SpecNative
+
+- Antes de editar codigo, leer la spec y las tareas asociadas.
+- Actualizar estado de tarea en `tasks/` al terminar cada una.
+- No cerrar una tarea sin evidencia de validacion (output de test o curl).
+- Si una decision cambia, actualizar `DECISIONS.md` antes de seguir.

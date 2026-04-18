@@ -2,33 +2,53 @@
 
 Direccion del proyecto en el tiempo.
 
-## Objetivo
+## Ahora — SPEC-0001: backend-bootstrap
 
-Dar contexto de prioridad sin convertir esto en una lista de tickets.
+Crear la estructura Maven multi-modulo completa siguiendo el patron de
+`ether-archetype` con SQLite en lugar de Postgres.
 
-## Cuando leer este archivo
+**Entregable:** `./mvnw clean compile` pasa desde la raiz con los 7 modulos.
 
-Leer antes de crear una nueva spec para confirmar que la iniciativa
-es coherente con la direccion actual del proyecto.
+Tareas en: `tasks/backend-bootstrap/TASKS.md`
 
-Si ROADMAP.md menciona una iniciativa pero no existe spec para ella,
-el siguiente paso es crear esa spec antes de implementar.
+## Despues — SPEC-0002: auth-service
 
-## Template
+Implementar `POST /api/auth/login` con:
+- Tabla `users` en `auth.db` (SQLite WAL)
+- Hash de contrasena con `ether-crypto`
+- Emision de JWT con `ether-jwt`
+- `LoginHandler` en `transport-jetty`
 
-### Ahora
+**Entregable:** `POST /api/auth/login` retorna `{token}` y los tests pasan.
 
-- Iniciativas activas
-- Bloqueos actuales
+Tareas en: `tasks/auth-service/TASKS.md`
 
-### Despues
+## Despues — SPEC-0003: chat-service
 
-- Siguientes prioridades
+Implementar `POST /api/chat/message` con:
+- Tablas `conversations` y `messages` en `chat.db` (SQLite WAL)
+- Verificacion JWT en cada request
+- Puerto `AiGateway` con implementacion `EchoAiGateway`
+- `ChatMessageHandler` en `transport-jetty`
 
-### Mas adelante
+**Entregable:** `POST /api/chat/message` con token valido retorna `{content, conversation_id}`.
 
-- Apuestas futuras
+Tareas en: `tasks/chat-service/TASKS.md`
 
-### No hacer por ahora
+## Mas adelante
 
-- Ideas descartadas temporalmente
+- `AiGateway` para OpenAI (`POST /v1/chat/completions`)
+- `AiGateway` para Ollama (compatible OpenAI)
+- Streaming SSE desde `ChatMessageHandler`
+- `WebSocketChatHandler` para streaming bidireccional
+- Tests de integracion con Testcontainers (cuando se necesite)
+- Docker image con jlink/jpackage o fat-jar
+
+## No hacer por ahora
+
+- Multitenancy
+- Registro y administracion de usuarios via API
+- Migraciones versionadas (Flyway/Liquibase) — el schema se aplica al
+  arrancar con `IF NOT EXISTS`
+- Cambio de motor a Postgres — crear `infra-postgres` si se necesita,
+  sin tocar `core` ni `ports`

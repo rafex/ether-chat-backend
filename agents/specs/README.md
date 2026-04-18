@@ -32,6 +32,14 @@ agents/specs/
   mi-iniciativa.md
 ```
 
+## Specs del proyecto
+
+| ID | Carpeta | Estado | Descripcion |
+|----|---------|--------|-------------|
+| SPEC-0001 | `backend-bootstrap/` | `active` | Estructura Maven multi-modulo con ether-archetype y SQLite |
+| SPEC-0002 | `auth-service/` | `draft` | `POST /api/auth/login` con JWT y SQLite WAL |
+| SPEC-0003 | `chat-service/` | `draft` | `POST /api/chat/message` con AiGateway y SQLite WAL |
+
 ## Regla de navegacion
 
 - Si entras a una iniciativa, abre primero su `README.md`.

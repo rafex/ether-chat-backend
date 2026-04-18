@@ -1,79 +1,33 @@
 # SPEC.md
 
-Spec activa o spec general del trabajo en curso.
+Punto de entrada al trabajo activo del proyecto.
 
-## Cuando usar este archivo
+## Estado general
 
-- Cuando el proyecto aun no necesita una carpeta de specs por iniciativa.
-- Cuando se quiere definir una sola capacidad activa.
-- Como plantilla para mover luego una spec a `specs/`.
+Este archivo enruta a las specs por iniciativa. El trabajo esta dividido
+en tres iniciativas secuenciales. Cada una tiene su spec y sus tareas.
 
-## Template
+## Specs activas
 
-### Metadata
+| ID | Iniciativa | Estado | Carpeta |
+|----|-----------|--------|---------|
+| SPEC-0001 | backend-bootstrap | `active` | `specs/backend-bootstrap/SPEC.md` |
+| SPEC-0002 | auth-service | `draft` | `specs/auth-service/SPEC.md` |
+| SPEC-0003 | chat-service | `draft` | `specs/chat-service/SPEC.md` |
 
-- ID:
-- Estado: `draft | active | blocked | done | superseded`
-- Owner:
-- Fecha de creacion: YYYY-MM-DD
-- Ultima actualizacion: YYYY-MM-DD
-- Reemplaza: `none` o SPEC-XXXX
-- Tareas relacionadas:
-- Decisiones relacionadas:
+## Orden de ejecucion
 
-### Resumen
+```
+SPEC-0001  ──►  SPEC-0002  ──►  SPEC-0003
+(estructura)    (auth REST)     (chat REST)
+```
 
-Describe en pocas lineas que capacidad se quiere construir.
+SPEC-0002 y SPEC-0003 dependen del proyecto Maven generado en SPEC-0001.
 
-### Problema
+## Como empezar
 
-Que friccion existe hoy y para quien.
-
-### Objetivo
-
-Que estado observable debe existir al terminar.
-
-### Alcance
-
-- Incluye
-- Excluye
-
-### Requisitos funcionales
-
-- RF-1
-- RF-2
-
-### Requisitos no funcionales
-
-- RNF-1
-- RNF-2
-
-### Criterios de aceptacion
-
-- Dado
-- Cuando
-- Entonces
-
-### Dependencias y riesgos
-
-- Dependencia
-- Riesgo
-
-### Plan de ejecucion
-
-- Tarea o lote de tareas
-- Orden sugerido
-- Bloqueos conocidos
-- Criterio de cierre
-
-### Plan de validacion
-
-- Test manual
-- Test automatizado
-- Evidencia esperada
-
-### Trazabilidad
-
-- Commits o PRs:
-- Archivos principales:
-- Resultado de validacion:
+1. Leer `agents/ARCHITECTURE.md` para entender la estructura de modulos.
+2. Leer `agents/STACK.md` para las coordenadas Maven exactas.
+3. Leer `agents/DECISIONS.md` para restricciones de diseno.
+4. Abrir `specs/backend-bootstrap/SPEC.md` y ejecutar las tareas en
+   `tasks/backend-bootstrap/TASKS.md`.
