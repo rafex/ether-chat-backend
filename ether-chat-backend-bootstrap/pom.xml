@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>dev.rafex.chat</groupId>
+        <artifactId>ether-chat-backend</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>ether-chat-backend-bootstrap</artifactId>
+    <dependencies>
+        <dependency><groupId>dev.rafex.chat</groupId><artifactId>ether-chat-backend-common</artifactId></dependency>
+        <dependency><groupId>dev.rafex.chat</groupId><artifactId>ether-chat-backend-ports</artifactId></dependency>
+        <dependency><groupId>dev.rafex.chat</groupId><artifactId>ether-chat-backend-core</artifactId></dependency>
+        <dependency><groupId>dev.rafex.chat</groupId><artifactId>ether-chat-backend-infra-sqlite</artifactId></dependency>
+        <dependency><groupId>dev.rafex.ether.di</groupId><artifactId>ether-di</artifactId></dependency>
+        <dependency><groupId>dev.rafex.ether.json</groupId><artifactId>ether-json</artifactId></dependency>
+        <dependency><groupId>dev.rafex.ether.jdbc</groupId><artifactId>ether-jdbc</artifactId></dependency>
+        <dependency><groupId>dev.rafex.ether.database</groupId><artifactId>ether-database-core</artifactId></dependency>
+        <dependency><groupId>dev.rafex.ether.crypto</groupId><artifactId>ether-crypto</artifactId></dependency>
+        <dependency><groupId>org.xerial</groupId><artifactId>sqlite-jdbc</artifactId></dependency>
+    </dependencies>
+</project>
