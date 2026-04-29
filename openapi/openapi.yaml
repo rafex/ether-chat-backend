@@ -1,0 +1,196 @@
+openapi: 3.0.3
+info:
+  title: Ether Chat Backend API
+  version: 1.0.0
+  description: |
+    Contrato REST del backend de chat.
+    Este archivo se puede importar directamente en Postman.
+servers:
+  - url: "{{baseUrl}}"
+    description: URL base configurable (ej: http://localhost:8080)
+tags:
+  - name: Health
+  - name: Auth
+  - name: Chat
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check del backend
+      responses:
+        '200':
+          description: Servicio disponible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                ok:
+                  value:
+                    status: ok
+                    version: "1.0.0"
+                    timestamp: "2026-04-18T12:00:00Z"
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Inicia sesion y retorna JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              demo:
+                value:
+                  username: demo
+                  password: password123
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              examples:
+                success:
+                  value:
+                    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Request invalido
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemResponse'
+              examples:
+                missing-field:
+                  value:
+                    type: about:blank
+                    title: Bad Request
+                    status: 400
+                    detail: username and password are required
+        '401':
+          description: Credenciales invalidas
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemResponse'
+  /api/chat/message:
+    post:
+      tags: [Chat]
+      summary: Envia un mensaje al chat y obtiene respuesta del agente
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessageRequest'
+            examples:
+              new-conversation:
+                value:
+                  message: Hola
+                  conversation_id: null
+              existing-conversation:
+                value:
+                  message: Continuemos la conversacion
+                  conversation_id: 8d7d29d5-30ba-45f1-a6fc-307a08f89a0b
+      responses:
+        '200':
+          description: Respuesta del chat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessageResponse'
+              examples:
+                success:
+                  value:
+                    content: "[ECHO] Hola"
+                    conversation_id: 8d7d29d5-30ba-45f1-a6fc-307a08f89a0b
+        '400':
+          description: Request invalido
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemResponse'
+        '401':
+          description: Token ausente, invalido o header fuera de contrato
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Debe enviarse como `Authorization: Bearer <token>`.
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status, version, timestamp]
+      properties:
+        status:
+          type: string
+          example: ok
+        version:
+          type: string
+          example: "1.0.0"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-04-18T12:00:00Z"
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+    LoginResponse:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          description: JWT firmado con HS256.
+    ChatMessageRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        conversation_id:
+          type: string
+          nullable: true
+          format: uuid
+          description: UUID existente; null para crear conversacion nueva.
+    ChatMessageResponse:
+      type: object
+      required: [content, conversation_id]
+      properties:
+        content:
+          type: string
+        conversation_id:
+          type: string
+          format: uuid
+    ProblemResponse:
+      type: object
+      required: [title, status]
+      properties:
+        type:
+          type: string
+          example: about:blank
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        instance:
+          type: string

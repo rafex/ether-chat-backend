@@ -4,30 +4,37 @@ Punto de entrada al trabajo activo del proyecto.
 
 ## Estado general
 
-Este archivo enruta a las specs por iniciativa. El trabajo esta dividido
-en tres iniciativas secuenciales. Cada una tiene su spec y sus tareas.
+La base del backend (SPEC-0001 a SPEC-0003) esta cerrada y hay una
+iniciativa activa para proveedor real + transporte realtime MVP.
 
-## Specs activas
+## Specs registradas
 
 | ID | Iniciativa | Estado | Carpeta |
 |----|-----------|--------|---------|
-| SPEC-0001 | backend-bootstrap | `active` | `specs/backend-bootstrap/SPEC.md` |
-| SPEC-0002 | auth-service | `draft` | `specs/auth-service/SPEC.md` |
-| SPEC-0003 | chat-service | `draft` | `specs/chat-service/SPEC.md` |
+| SPEC-0001 | backend-bootstrap | `done` | `specs/backend-bootstrap/SPEC.md` |
+| SPEC-0002 | auth-service | `done` | `specs/auth-service/SPEC.md` |
+| SPEC-0003 | chat-service | `done` | `specs/chat-service/SPEC.md` |
+| SPEC-0004 | ai-realtime-mvp | `active` | `specs/ai-realtime-mvp/SPEC.md` |
 
-## Orden de ejecucion
+## Secuencia completada
 
 ```
 SPEC-0001  ──►  SPEC-0002  ──►  SPEC-0003
 (estructura)    (auth REST)     (chat REST)
 ```
 
-SPEC-0002 y SPEC-0003 dependen del proyecto Maven generado en SPEC-0001.
+La base multi-modulo, el login y el endpoint de chat quedaron cerrados
+en ese orden.
+
+## Trabajo actual
+
+```
+SPEC-0004
+(deepseek + websocket mvp)
+```
 
 ## Como empezar
 
-1. Leer `agents/ARCHITECTURE.md` para entender la estructura de modulos.
-2. Leer `agents/STACK.md` para las coordenadas Maven exactas.
-3. Leer `agents/DECISIONS.md` para restricciones de diseno.
-4. Abrir `specs/backend-bootstrap/SPEC.md` y ejecutar las tareas en
-   `tasks/backend-bootstrap/TASKS.md`.
+1. Leer `agents/ARCHITECTURE.md` para entender la estructura actual.
+2. Ejecutar `tasks/ai-realtime-mvp/TASKS.md` en orden de dependencias.
+3. Actualizar `agents/TRACEABILITY.md` al completar la spec.

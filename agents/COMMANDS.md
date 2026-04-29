@@ -43,6 +43,18 @@ SERVER_PORT=8080 \
 AUTH_DB_PATH=./data/auth.db \
 CHAT_DB_PATH=./data/chat.db \
 JWT_SECRET=supersecret-minimum-32-characters! \
+AI_PROVIDER=echo \
+java -jar ether-chat-backend-transport-jetty/target/ether-chat-backend-transport-jetty-jar-with-dependencies.jar
+
+# Proveedor real DeepSeek (siempre via variables de entorno, ideal para CI/CD)
+SERVER_PORT=8080 \
+AUTH_DB_PATH=./data/auth.db \
+CHAT_DB_PATH=./data/chat.db \
+JWT_SECRET=supersecret-minimum-32-characters! \
+AI_PROVIDER=deepseek \
+DEEPSEEK_API_KEY=your_deepseek_api_key \
+DEEPSEEK_MODEL=deepseek-chat \
+DEEPSEEK_BASE_URL=https://api.deepseek.com/v1 \
 java -jar ether-chat-backend-transport-jetty/target/ether-chat-backend-transport-jetty-jar-with-dependencies.jar
 
 # Con Maven exec (sin empaquetar, desde transport-jetty)
@@ -71,6 +83,21 @@ curl -X POST http://localhost:8080/api/chat/message \
   -H "Authorization: Bearer TOKEN" \
   -d '{"message":"Hola","conversation_id":null}'
 ```
+
+`Authorization` sin prefijo `Bearer ` debe considerarse invalido (`401`).
+
+## OpenAPI / Postman
+
+```bash
+# Contrato OpenAPI para importar en Postman
+ls openapi/openapi.yaml
+```
+
+Pasos recomendados en Postman:
+1. Importar `openapi/openapi.yaml`.
+2. Definir variable `baseUrl` con `http://localhost:8080`.
+3. Ejecutar `POST /api/auth/login` y guardar `token`.
+4. Usar `Authorization: Bearer <token>` en `POST /api/chat/message`.
 
 ## Maven Wrapper — instalar en un modulo nuevo
 

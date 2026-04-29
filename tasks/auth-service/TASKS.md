@@ -3,7 +3,7 @@ artifact_type = "task_file"
 initiative    = "auth-service"
 spec_id       = "SPEC-0002"
 owner         = "rafex"
-state         = "todo"
+state         = "done"
 +++
 
 # Tasks: auth-service
@@ -15,7 +15,8 @@ Tareas para implementar `POST /api/auth/login`. Requiere SPEC-0001 done.
 +++
 id             = "TASK-0010"
 title          = "Implementar AuthDb.init() con schema SQL y pragmas WAL"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = []
 expected_files = ["ether-chat-backend-infra-sqlite/src/main/java/dev/rafex/chat/auth/infra/AuthDb.java"]
 close_criteria = "AuthDb.init() con DatabaseClient en memoria no lanza excepciones"
@@ -38,7 +39,8 @@ Escribir `AuthDbTest.java` que:
 +++
 id             = "TASK-0011"
 title          = "Implementar UserRepositoryImpl"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0010"]
 expected_files = ["ether-chat-backend-infra-sqlite/src/main/java/dev/rafex/chat/auth/infra/UserRepositoryImpl.java",
                   "ether-chat-backend-infra-sqlite/src/test/java/dev/rafex/chat/auth/infra/UserRepositoryImplTest.java"]
@@ -72,7 +74,8 @@ Retornar `new User(id, username, passwordHash, createdAt)`.
 +++
 id             = "TASK-0012"
 title          = "Implementar AuthServiceImpl con ether-crypto y ether-jwt"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0011"]
 expected_files = ["ether-chat-backend-core/src/main/java/dev/rafex/chat/auth/service/AuthServiceImpl.java",
                   "ether-chat-backend-core/src/test/java/dev/rafex/chat/auth/service/AuthServiceImplTest.java"]
@@ -121,7 +124,8 @@ Metodo `login(Credentials credentials)`:
 +++
 id             = "TASK-0013"
 title          = "Seed de usuario demo en AppBootstrap"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0012"]
 expected_files = ["ether-chat-backend-bootstrap/src/main/java/dev/rafex/chat/bootstrap/SeedUsers.java"]
 close_criteria = "Al arrancar, si auth.db esta vacia, el usuario demo existe"
@@ -152,7 +156,8 @@ despues de `AuthDb.init(authDb)`.
 +++
 id             = "TASK-0014"
 title          = "Implementar LoginHandler"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0013"]
 expected_files = ["ether-chat-backend-transport-jetty/src/main/java/dev/rafex/chat/auth/handler/LoginHandler.java",
                   "ether-chat-backend-transport-jetty/src/test/java/dev/rafex/chat/auth/handler/LoginHandlerTest.java"]
@@ -201,7 +206,8 @@ Registrar en `AppServer.java`:
 +++
 id             = "TASK-0015"
 title          = "Validacion end-to-end de auth-service"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0014"]
 expected_files = []
 close_criteria = "POST /api/auth/login retorna JWT verificable"
@@ -234,5 +240,4 @@ validation     = ["./mvnw clean verify",
    Debe responder `401` con body RFC 7807.
 
 5. Actualizar SPEC-0002 `state = "done"`.
-6. Actualizar SPEC-0003 `state = "active"`.
-7. Actualizar TRACEABILITY.md.
+6. Actualizar TRACEABILITY.md.

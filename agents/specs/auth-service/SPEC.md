@@ -1,10 +1,10 @@
 +++
 artifact_type = "spec"
 id            = "SPEC-0002"
-state         = "draft"
+state         = "done"
 owner         = "rafex"
 created_at    = "2026-04-17"
-updated_at    = "2026-04-17"
+updated_at    = "2026-04-18"
 replaces      = "none"
 related_tasks       = ["TASK-0010", "TASK-0011", "TASK-0012", "TASK-0013",
                        "TASK-0014", "TASK-0015"]

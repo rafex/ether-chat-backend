@@ -3,7 +3,7 @@ artifact_type = "task_file"
 initiative    = "chat-service"
 spec_id       = "SPEC-0003"
 owner         = "rafex"
-state         = "todo"
+state         = "done"
 +++
 
 # Tasks: chat-service
@@ -15,7 +15,8 @@ Tareas para implementar `POST /api/chat/message`. Requiere SPEC-0002 done.
 +++
 id             = "TASK-0020"
 title          = "Implementar ChatDb.init() con schema SQL y pragmas WAL"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = []
 expected_files = ["ether-chat-backend-infra-sqlite/src/main/java/dev/rafex/chat/chat/infra/ChatDb.java",
                   "ether-chat-backend-infra-sqlite/src/test/java/dev/rafex/chat/chat/infra/ChatDbTest.java"]
@@ -40,7 +41,8 @@ Test `ChatDbTest`:
 +++
 id             = "TASK-0021"
 title          = "Implementar ConversationRepositoryImpl y MessageRepositoryImpl"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0020"]
 expected_files = ["ether-chat-backend-infra-sqlite/src/main/java/dev/rafex/chat/chat/infra/ConversationRepositoryImpl.java",
                   "ether-chat-backend-infra-sqlite/src/main/java/dev/rafex/chat/chat/infra/MessageRepositoryImpl.java",
@@ -98,7 +100,8 @@ FROM messages WHERE conversation_id = ? ORDER BY created_at ASC
 +++
 id             = "TASK-0022"
 title          = "Implementar EchoAiGateway"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = []
 expected_files = ["ether-chat-backend-infra-sqlite/src/main/java/dev/rafex/chat/chat/infra/EchoAiGateway.java",
                   "ether-chat-backend-infra-sqlite/src/test/java/dev/rafex/chat/chat/infra/EchoAiGatewayTest.java"]
@@ -137,7 +140,8 @@ Tests:
 +++
 id             = "TASK-0023"
 title          = "Implementar ChatServiceImpl"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0021", "TASK-0022"]
 expected_files = ["ether-chat-backend-core/src/main/java/dev/rafex/chat/chat/service/ChatServiceImpl.java",
                   "ether-chat-backend-core/src/test/java/dev/rafex/chat/chat/service/ChatServiceImplTest.java"]
@@ -200,7 +204,8 @@ public final class ChatServiceImpl implements ChatService {
 +++
 id             = "TASK-0024"
 title          = "Cablear ChatService en AppBootstrap y AppContainer"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0023"]
 expected_files = ["ether-chat-backend-bootstrap/src/main/java/dev/rafex/chat/bootstrap/AppContainer.java",
                   "ether-chat-backend-bootstrap/src/main/java/dev/rafex/chat/bootstrap/AppBootstrap.java"]
@@ -233,7 +238,8 @@ Actualizar `AppContainer` con `chatService` y `json`.
 +++
 id             = "TASK-0025"
 title          = "Implementar ChatMessageHandler"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0024"]
 expected_files = ["ether-chat-backend-transport-jetty/src/main/java/dev/rafex/chat/chat/handler/ChatMessageHandler.java",
                   "ether-chat-backend-transport-jetty/src/test/java/dev/rafex/chat/chat/handler/ChatMessageHandlerTest.java"]
@@ -289,7 +295,8 @@ Registrar en `AppServer.java`:
 +++
 id             = "TASK-0026"
 title          = "Validacion end-to-end de chat-service"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0025"]
 expected_files = []
 close_criteria = "Flujo completo: login → chat funciona end-to-end"

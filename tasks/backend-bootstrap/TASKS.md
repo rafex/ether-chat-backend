@@ -3,7 +3,7 @@ artifact_type = "task_file"
 initiative    = "backend-bootstrap"
 spec_id       = "SPEC-0001"
 owner         = "rafex"
-state         = "todo"
+state         = "done"
 +++
 
 # Tasks: backend-bootstrap
@@ -16,7 +16,8 @@ Ejecutar en orden; cada tarea depende de la anterior.
 +++
 id             = "TASK-0001"
 title          = "Crear pom.xml raiz (parent aggregator)"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = []
 expected_files = ["pom.xml", ".mvn/wrapper/maven-wrapper.properties", "mvnw", "mvnw.cmd"]
 close_criteria = "./mvnw validate pasa sin errores"
@@ -110,7 +111,8 @@ wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-w
 +++
 id             = "TASK-0002"
 title          = "Crear modulo ether-chat-backend-common"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0001"]
 expected_files = ["ether-chat-backend-common/pom.xml",
                   "ether-chat-backend-common/src/main/java/dev/rafex/chat/shared/config/AppConfig.java",
@@ -253,7 +255,8 @@ Copiar `.mvn/wrapper/` + `mvnw` + `mvnw.cmd` del root a este modulo.
 +++
 id             = "TASK-0003"
 title          = "Crear modulo ether-chat-backend-ports"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0002"]
 expected_files = ["ether-chat-backend-ports/pom.xml",
                   "ether-chat-backend-ports/src/main/java/dev/rafex/chat/auth/port/UserRepository.java",
@@ -336,7 +339,8 @@ Copiar Maven Wrapper a este modulo.
 +++
 id             = "TASK-0004"
 title          = "Crear modulo ether-chat-backend-core"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0003"]
 expected_files = ["ether-chat-backend-core/pom.xml",
                   "ether-chat-backend-core/src/main/java/dev/rafex/chat/auth/domain/User.java",
@@ -410,7 +414,8 @@ Copiar Maven Wrapper a este modulo.
 +++
 id             = "TASK-0005"
 title          = "Crear modulo ether-chat-backend-infra-sqlite"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0004"]
 expected_files = ["ether-chat-backend-infra-sqlite/pom.xml",
                   "ether-chat-backend-infra-sqlite/src/main/java/dev/rafex/chat/auth/infra/AuthDb.java",
@@ -482,7 +487,8 @@ Copiar Maven Wrapper a este modulo.
 +++
 id             = "TASK-0006"
 title          = "Crear modulo ether-chat-backend-bootstrap"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0005"]
 expected_files = ["ether-chat-backend-bootstrap/pom.xml",
                   "ether-chat-backend-bootstrap/src/main/java/dev/rafex/chat/bootstrap/AppContainer.java",
@@ -565,7 +571,8 @@ Copiar Maven Wrapper a este modulo.
 +++
 id             = "TASK-0007"
 title          = "Crear modulo ether-chat-backend-transport-jetty"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0006"]
 expected_files = ["ether-chat-backend-transport-jetty/pom.xml",
                   "ether-chat-backend-transport-jetty/src/main/java/dev/rafex/chat/App.java",
@@ -632,7 +639,8 @@ Copiar Maven Wrapper a este modulo.
 +++
 id             = "TASK-0008"
 title          = "Crear modulo ether-chat-backend-architecture-tests"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0007"]
 expected_files = ["ether-chat-backend-architecture-tests/pom.xml",
                   "ether-chat-backend-architecture-tests/src/test/java/dev/rafex/chat/arch/HexagonalArchitectureTest.java"]
@@ -686,7 +694,8 @@ Copiar Maven Wrapper a este modulo.
 +++
 id             = "TASK-0009"
 title          = "Validacion final de SPEC-0001"
-state          = "todo"
+owner          = "rafex"
+state         = "done"
 dependencies   = ["TASK-0008"]
 expected_files = []
 close_criteria = "./mvnw clean compile BUILD SUCCESS con 7 modulos"
@@ -709,5 +718,4 @@ validation     = ["./mvnw clean compile",
    {"status":"ok","version":"1.0.0-SNAPSHOT","timestamp":"<ISO>"}
    ```
 5. Actualizar SPEC-0001 `state = "done"` en `agents/specs/backend-bootstrap/SPEC.md`.
-6. Actualizar SPEC-0002 `state = "active"`.
-7. Actualizar TRACEABILITY.md con el resultado.
+6. Actualizar TRACEABILITY.md con el resultado.

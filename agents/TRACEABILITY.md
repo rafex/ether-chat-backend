@@ -7,9 +7,10 @@ Actualizar al cerrar cada iniciativa.
 
 | Spec | Estado | Tareas | Decisiones | Archivos principales | Validacion |
 |------|--------|--------|-----------|---------------------|-----------|
-| SPEC-0001 | `active` | tasks/backend-bootstrap/TASKS.md | DEC-0002, DEC-0003, DEC-0004 | pom.xml raiz y todos los modulos | `./mvnw clean compile` |
-| SPEC-0002 | `draft` | tasks/auth-service/TASKS.md | DEC-0001, DEC-0005, DEC-0006 | `*-ports/`, `*-core/`, `*-infra-sqlite/`, `*-transport-jetty/` | `POST /api/auth/login` retorna 200 |
-| SPEC-0003 | `draft` | tasks/chat-service/TASKS.md | DEC-0001, DEC-0005 | `*-ports/`, `*-core/`, `*-infra-sqlite/`, `*-transport-jetty/` | `POST /api/chat/message` retorna 200 |
+| SPEC-0001 | `done` | tasks/backend-bootstrap/TASKS.md | DEC-0002, DEC-0003, DEC-0004 | pom.xml raiz y todos los modulos | `mvn -DskipTests package`, `GET /health` |
+| SPEC-0002 | `done` | tasks/auth-service/TASKS.md | DEC-0001, DEC-0006 | `*-auth-*`, `AuthServiceImpl`, `LoginHandler` | `POST /api/auth/login` retorna 200 con token |
+| SPEC-0003 | `done` | tasks/chat-service/TASKS.md | DEC-0001, DEC-0005 | `*-chat-*`, `ConversationRepositoryImpl`, `ChatMessageHandler`, `openapi/openapi.yaml` | `POST /api/chat/message` retorna 200 con JWT valido |
+| SPEC-0004 | `active` | tasks/ai-realtime-mvp/TASKS.md | DEC-0005, DEC-0006 | `DeepseekAiGateway`, `WebSocketChatHandler`, `AppBootstrap`, `AppServer` | `POST /api/chat/message` con deepseek y `WS /ws/chat` con JWT |
 
 ## Decisiones y sus consecuencias en artefactos
 
@@ -21,3 +22,10 @@ Actualizar al cerrar cada iniciativa.
 | DEC-0004 Maven Wrapper | `.mvn/wrapper/` en todos los modulos |
 | DEC-0005 AiGateway | `*-ports/`: `AiGateway.java`; `*-infra-sqlite/`: `EchoAiGateway.java` |
 | DEC-0006 JWT HS256 | `*-core/`: `AuthServiceImpl.java`; `*-transport-jetty/`: `ChatMessageHandler.java` |
+
+## Evidencia reciente
+
+- 2026-04-18: `mvn -pl ether-chat-backend-infra-sqlite -am -Dtest=UserRepositoryImplTest,ConversationRepositoryImplTest -Dsurefire.failIfNoSpecifiedTests=false test`
+- 2026-04-18: `mvn -pl ether-chat-backend-transport-jetty -am -Dtest=ChatMessageHandlerTest -Dsurefire.failIfNoSpecifiedTests=false test`
+- 2026-04-18: `mvn -DskipTests package`
+- 2026-04-18: smoke manual con `GET /health`, `POST /api/auth/login` y `POST /api/chat/message`

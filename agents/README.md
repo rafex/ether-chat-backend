@@ -29,6 +29,8 @@ Si eres un agente o una persona entrando por primera vez:
   reglas de codigo, naming, testing y organizacion.
 - [`COMMANDS.md`](./COMMANDS.md):
   comandos de desarrollo, test, lint y operaciones comunes.
+- [`../openapi/openapi.yaml`](../openapi/openapi.yaml):
+  contrato OpenAPI importable en Postman para endpoints REST.
 - [`DECISIONS.md`](./DECISIONS.md):
   decisiones relevantes ya tomadas y su racional.
 - [`TRACEABILITY.md`](./TRACEABILITY.md):

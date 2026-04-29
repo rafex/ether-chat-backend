@@ -123,8 +123,14 @@ PRAGMA foreign_keys=ON;
 | `CHAT_DB_PATH` | `./data/chat.db` | Path del archivo SQLite de chat |
 | `JWT_SECRET` | — | Secreto HMAC HS256 (minimo 32 chars, requerido) |
 | `JWT_EXPIRY_SECONDS` | `86400` | Duracion del token en segundos |
+| `AI_PROVIDER` | `echo` | Selector de proveedor AI: `echo` o `deepseek` |
+| `DEEPSEEK_API_KEY` | — | API key para DeepSeek cuando `AI_PROVIDER=deepseek` |
+| `DEEPSEEK_MODEL` | `deepseek-chat` | Modelo a usar en DeepSeek |
+| `DEEPSEEK_BASE_URL` | `https://api.deepseek.com/v1` | URL base del API de DeepSeek |
 
 ## API Contract
+
+Fuente de verdad para REST: `openapi/openapi.yaml`.
 
 ```
 POST /api/auth/login
@@ -143,7 +149,7 @@ POST /api/chat/message
 GET /health
   200:      { "status": "ok", "version": "string", "timestamp": "ISO-8601" }
 
-WS /ws/chat          [futuro — streaming de tokens]
+WS /ws/chat          [futuro — realtime MVP de SPEC-0004]
   Headers:  Authorization: Bearer <token>
 ```
 

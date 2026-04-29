@@ -2,45 +2,37 @@
 
 Direccion del proyecto en el tiempo.
 
-## Ahora — SPEC-0001: backend-bootstrap
+## Base completada
 
-Crear la estructura Maven multi-modulo completa siguiendo el patron de
-`ether-archetype` con SQLite en lugar de Postgres.
+- `SPEC-0001` backend-bootstrap: multi-modulo Maven operativo.
+- `SPEC-0002` auth-service: `POST /api/auth/login` con seed `demo`.
+- `SPEC-0003` chat-service: `POST /api/chat/message` con JWT y
+  `EchoAiGateway`.
 
-**Entregable:** `./mvnw clean compile` pasa desde la raiz con los 7 modulos.
+Validacion observada el 18 de abril de 2026:
+- `mvn -DskipTests package`
+- `GET /health`
+- `POST /api/auth/login`
+- `POST /api/chat/message`
 
-Tareas en: `tasks/backend-bootstrap/TASKS.md`
+## Siguiente
 
-## Despues — SPEC-0002: auth-service
+## Ahora — SPEC-0004: ai-realtime-mvp
 
-Implementar `POST /api/auth/login` con:
-- Tabla `users` en `auth.db` (SQLite WAL)
-- Hash de contrasena con `ether-crypto`
-- Emision de JWT con `ether-jwt`
-- `LoginHandler` en `transport-jetty`
+Implementar proveedor real con `ether-ai-deepseek` y soporte realtime
+MVP en `WS /ws/chat` usando `ether-websocket-jetty12`.
 
-**Entregable:** `POST /api/auth/login` retorna `{token}` y los tests pasan.
+**Entregables:**
 
-Tareas en: `tasks/auth-service/TASKS.md`
+- REST `POST /api/chat/message` usa DeepSeek cuando `AI_PROVIDER=deepseek`
+- fallback a `EchoAiGateway` cuando no hay config
+- `WS /ws/chat` con JWT valido responde `{content, conversation_id}`
 
-## Despues — SPEC-0003: chat-service
+Tareas en: `tasks/ai-realtime-mvp/TASKS.md`
 
-Implementar `POST /api/chat/message` con:
-- Tablas `conversations` y `messages` en `chat.db` (SQLite WAL)
-- Verificacion JWT en cada request
-- Puerto `AiGateway` con implementacion `EchoAiGateway`
-- `ChatMessageHandler` en `transport-jetty`
+## Despues
 
-**Entregable:** `POST /api/chat/message` con token valido retorna `{content, conversation_id}`.
-
-Tareas en: `tasks/chat-service/TASKS.md`
-
-## Mas adelante
-
-- `AiGateway` para OpenAI (`POST /v1/chat/completions`)
-- `AiGateway` para Ollama (compatible OpenAI)
-- Streaming SSE desde `ChatMessageHandler`
-- `WebSocketChatHandler` para streaming bidireccional
+- Streaming SSE desde `ChatMessageHandler` (token-by-token)
 - Tests de integracion con Testcontainers (cuando se necesite)
 - Docker image con jlink/jpackage o fat-jar
 

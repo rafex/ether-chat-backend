@@ -36,9 +36,10 @@ agents/specs/
 
 | ID | Carpeta | Estado | Descripcion |
 |----|---------|--------|-------------|
-| SPEC-0001 | `backend-bootstrap/` | `active` | Estructura Maven multi-modulo con ether-archetype y SQLite |
-| SPEC-0002 | `auth-service/` | `draft` | `POST /api/auth/login` con JWT y SQLite WAL |
-| SPEC-0003 | `chat-service/` | `draft` | `POST /api/chat/message` con AiGateway y SQLite WAL |
+| SPEC-0001 | `backend-bootstrap/` | `done` | Estructura Maven multi-modulo con ether-archetype y SQLite |
+| SPEC-0002 | `auth-service/` | `done` | `POST /api/auth/login` con JWT y SQLite WAL |
+| SPEC-0003 | `chat-service/` | `done` | `POST /api/chat/message` con AiGateway y SQLite WAL |
+| SPEC-0004 | `ai-realtime-mvp/` | `active` | `ether-ai-deepseek` real + `WS /ws/chat` MVP |
 
 ## Regla de navegacion
 
