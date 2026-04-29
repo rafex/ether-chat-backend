@@ -1,0 +1,82 @@
+name: Build and Publish Container
+
+on:
+  push:
+    tags:
+      - 'v*.*'
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: 'Tag de version para la imagen (formato vN.YYYYmmDD[-N])'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  OWNER: rafex
+  IMAGE_NAME: ether-chat-backend
+
+jobs:
+  build-and-push:
+    name: Build and push image
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Resolve and validate image tag
+        id: image_tag
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            IMAGE_TAG="${{ github.event.inputs.version_tag }}"
+          else
+            IMAGE_TAG="${GITHUB_REF_NAME}"
+          fi
+
+          if ! echo "$IMAGE_TAG" | grep -Eq '^v[0-9]+\.[0-9]{8}(-[0-9]+)?$'; then
+            echo "Invalid tag format: $IMAGE_TAG"
+            echo "Expected format: vN.YYYYmmDD[-N]"
+            exit 1
+          fi
+
+          echo "value=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          architecture: x64
+          cache: maven
+
+      - name: Build jar
+        run: ./mvnw clean package -DskipTests -q
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: container/backend/java/Dockerfile
+          push: true
+          provenance: false
+          sbom: false
+          platforms: linux/amd64
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:${{ steps.image_tag.outputs.value }}
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

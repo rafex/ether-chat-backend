@@ -1,0 +1,22 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: __RELEASE_NAME__
+  namespace: __NAMESPACE__
+  labels:
+    app.kubernetes.io/name: ether-chat-backend
+    app.kubernetes.io/instance: __RELEASE_NAME__
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: __RELEASE_NAME__
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

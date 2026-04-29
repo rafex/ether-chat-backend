@@ -1,0 +1,160 @@
+name: Deploy ether-chat-backend
+
+on:
+  workflow_call:
+    inputs:
+      version_tag:
+        description: 'Tag de imagen a desplegar (opcional, formato vN.YYYYmmDD[-N])'
+        required: false
+        default: ''
+        type: string
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: 'Tag de imagen a desplegar (opcional, formato vN.YYYYmmDD[-N])'
+        required: false
+        default: ''
+        type: string
+
+env:
+  K3S_NAMESPACE: mvps
+  RELEASE_NAME: ether-chat-backend
+  IMAGE_REPOSITORY: ghcr.io/rafex/ether-chat-backend
+  SERVER_K3S: ${{ vars.SERVER_K3S }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install yq
+        uses: mikefarah/yq@v4.44.3
+
+      - name: Configure kubeconfig
+        run: |
+          if [ -z "${{ secrets.KUBE_CONFIG_DATA }}" ]; then
+            echo "::error::Missing required secret: KUBE_CONFIG_DATA"
+            exit 1
+          fi
+          if [ -z "${{ vars.SERVER_K3S }}" ]; then
+            echo "::error::Missing required variable: SERVER_K3S"
+            exit 1
+          fi
+          if [ -z "${{ secrets.JWT_SECRET }}" ]; then
+            echo "::error::Missing required secret: JWT_SECRET"
+            exit 1
+          fi
+
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+          SERVER="${{ vars.SERVER_K3S }}"
+          if ! echo "$SERVER" | grep -q '^https\?://'; then
+            SERVER="https://${SERVER}:6443"
+          fi
+
+          CURRENT_SERVER=$(yq eval '.clusters[0].cluster.server' "$HOME/.kube/config")
+          echo "Replacing server: $CURRENT_SERVER → $SERVER"
+          yq eval -i '.clusters[0].cluster.server = "'"$SERVER"'"' "$HOME/.kube/config"
+          yq eval -i '.clusters[0].cluster."insecure-skip-tls-verify" = true | del(.clusters[0].cluster."certificate-authority-data")' "$HOME/.kube/config"
+
+      - name: Resolve deploy image tag
+        id: deploy_tag
+        run: |
+          if [ -n "${{ inputs.version_tag }}" ]; then
+            IMAGE_TAG="${{ inputs.version_tag }}"
+          elif [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version_tag }}" ]; then
+            IMAGE_TAG="${{ github.event.inputs.version_tag }}"
+          elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            IMAGE_TAG="${GITHUB_REF_NAME}"
+          else
+            IMAGE_TAG="latest"
+          fi
+
+          if [ "$IMAGE_TAG" != "latest" ] && ! echo "$IMAGE_TAG" | grep -Eq '^v[0-9]+\.[0-9]{8}(-[0-9]+)?$'; then
+            echo "Invalid deploy tag format: $IMAGE_TAG"
+            echo "Expected format: vN.YYYYmmDD[-N]"
+            exit 1
+          fi
+
+          echo "value=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          echo "Deploy image tag: $IMAGE_TAG"
+
+      - name: Ensure namespace exists
+        run: |
+          kubectl get namespace "$K3S_NAMESPACE" >/dev/null 2>&1 || kubectl create namespace "$K3S_NAMESPACE"
+
+      - name: Upsert app env secret in k3s
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          AI_PROVIDER: ${{ vars.AI_PROVIDER }}
+          DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          AI_PROVIDER_VALUE="${AI_PROVIDER:-echo}"
+          DEEPSEEK_MODEL_VALUE="${DEEPSEEK_MODEL:-deepseek-chat}"
+
+          kubectl -n "$K3S_NAMESPACE" create secret generic "${RELEASE_NAME}-app-env" \
+            --from-literal=JWT_SECRET="$JWT_SECRET" \
+            --from-literal=AI_PROVIDER="$AI_PROVIDER_VALUE" \
+            --from-literal=DEEPSEEK_MODEL="$DEEPSEEK_MODEL_VALUE" \
+            --from-literal=DEEPSEEK_API_KEY="$DEEPSEEK_API_KEY" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Render manifests
+        run: |
+          IMAGE="${IMAGE_REPOSITORY}:${{ steps.deploy_tag.outputs.value }}"
+          sed -e "s|__RELEASE_NAME__|${RELEASE_NAME}|g" \
+              -e "s|__NAMESPACE__|${K3S_NAMESPACE}|g" \
+              -e "s|__IMAGE__|${IMAGE}|g" \
+              infra/k8s/deployment.yaml > /tmp/deployment.yaml
+
+          sed -e "s|__RELEASE_NAME__|${RELEASE_NAME}|g" \
+              -e "s|__NAMESPACE__|${K3S_NAMESPACE}|g" \
+              infra/k8s/service.yaml > /tmp/service.yaml
+
+          sed -e "s|__RELEASE_NAME__|${RELEASE_NAME}|g" \
+              -e "s|__NAMESPACE__|${K3S_NAMESPACE}|g" \
+              infra/k8s/hpa.yaml > /tmp/hpa.yaml
+
+      - name: Apply manifests
+        run: |
+          kubectl apply -f /tmp/deployment.yaml
+          kubectl apply -f /tmp/service.yaml
+          kubectl apply -f /tmp/hpa.yaml
+
+      - name: Wait rollout
+        id: rollout_status
+        continue-on-error: true
+        run: |
+          kubectl -n "$K3S_NAMESPACE" rollout status "deployment/${RELEASE_NAME}" --timeout=240s
+
+      - name: Dump diagnostics on failed deploy
+        if: steps.rollout_status.outcome == 'failure'
+        run: |
+          echo "=== Deployment ==="
+          kubectl -n "$K3S_NAMESPACE" get deployment "$RELEASE_NAME" -o wide || true
+          echo
+          echo "=== Pods ==="
+          kubectl -n "$K3S_NAMESPACE" get pods -o wide || true
+          echo
+          echo "=== HPA ==="
+          kubectl -n "$K3S_NAMESPACE" get hpa "$RELEASE_NAME" -o wide || true
+          echo
+          echo "=== Events ==="
+          kubectl -n "$K3S_NAMESPACE" get events --sort-by=.lastTimestamp | tail -n 50 || true
+
+      - name: Fail if rollout did not succeed
+        if: steps.rollout_status.outcome == 'failure'
+        run: |
+          echo "Rollout no alcanzo estado Ready dentro del timeout" >&2
+          exit 1
+
+      - name: Print deployed image reference
+        if: steps.rollout_status.outcome == 'success'
+        run: |
+          echo "Deployed successfully with image: ${IMAGE_REPOSITORY}:${{ steps.deploy_tag.outputs.value }}"
+          echo "HA autoscaling configured: minReplicas=1, maxReplicas=2"
