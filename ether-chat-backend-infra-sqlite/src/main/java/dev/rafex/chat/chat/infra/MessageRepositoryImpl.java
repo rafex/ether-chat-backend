@@ -18,8 +18,8 @@ public final class MessageRepositoryImpl implements MessageRepository {
 
     @Override
     public Message save(Message msg) {
-        db.execute(new SqlBuilder("INSERT INTO messages(conversation_id, role, content) VALUES(?,?,?)")
-            .param(msg.conversationId()).param(msg.role().name()).param(msg.content()).build());
+        db.execute(new SqlBuilder("INSERT INTO messages(conversation_id, role, content) VALUES(")
+            .param(msg.conversationId()).append(",").param(msg.role().name()).append(",").param(msg.content()).append(")").build());
         long id = db.queryOne(SqlQuery.of("SELECT last_insert_rowid()"), rs -> rs.getLong(1)).orElse(0L);
         return new Message(id, msg.conversationId(), msg.role(), msg.content(), null);
     }
@@ -27,7 +27,7 @@ public final class MessageRepositoryImpl implements MessageRepository {
     @Override
     public List<Message> findByConversationId(String convId) {
         return db.queryList(
-            new SqlBuilder("SELECT id, conversation_id, role, content, created_at FROM messages WHERE conversation_id=? ORDER BY created_at ASC").param(convId).build(),
+            new SqlBuilder("SELECT id, conversation_id, role, content, created_at FROM messages WHERE conversation_id=").param(convId).append(" ORDER BY created_at ASC").build(),
             rs -> new Message(rs.getLong("id"), rs.getString("conversation_id"), MessageRole.valueOf(rs.getString("role")), rs.getString("content"), rs.getString("created_at"))
         );
     }

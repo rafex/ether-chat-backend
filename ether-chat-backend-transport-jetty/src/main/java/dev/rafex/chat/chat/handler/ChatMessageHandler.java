@@ -37,11 +37,7 @@ public final class ChatMessageHandler extends Handler.Abstract.NonBlocking {
             response.setStatus(405); callback.succeeded(); return true;
         }
         try {
-            String authHeader = request.getHeaders().get("Authorization");
-            if (authHeader == null || authHeader.isBlank()) {
-                return error(response, callback, 401, "Authorization header is required");
-            }
-            String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : authHeader;
+            String token = extractBearerToken(request.getHeaders().get("Authorization"));
             var kp = KeyProvider.hmac(config.jwtSecret());
             var jc = JwtConfig.builder(kp).requireExpiration(false).requireSubject(true).build();
             var result = new DefaultTokenVerifier(jc).verify(token, Instant.now());
@@ -71,6 +67,20 @@ public final class ChatMessageHandler extends Handler.Abstract.NonBlocking {
             LOG.warning("Chat error: " + e.getMessage());
             return error(response, callback, 500, "Internal server error");
         }
+    }
+
+    static String extractBearerToken(String authHeader) {
+        if (authHeader == null || authHeader.isBlank()) {
+            throw new AppError.Unauthorized("Authorization header is required");
+        }
+        if (!authHeader.startsWith("Bearer ")) {
+            throw new AppError.Unauthorized("Authorization header must use Bearer scheme");
+        }
+        String token = authHeader.substring("Bearer ".length()).trim();
+        if (token.isEmpty()) {
+            throw new AppError.Unauthorized("Bearer token is required");
+        }
+        return token;
     }
 
     private boolean error(Response response, Callback callback, int status, String detail) {

@@ -15,7 +15,7 @@ public final class AppServer {
     public static void start(AppContainer container) throws Exception {
         var json = container.json();
         var appConfig = AppConfig.load();
-        var srvCfg = JettyServerConfig.fromEnv();
+        var srvCfg = serverConfig(appConfig);
         var registry = new JettyRouteRegistry();
         registry.add("/health", new HealthHandler(json));
         registry.add("/api/auth/login", new LoginHandler(container.authPort(), json));
@@ -23,5 +23,39 @@ public final class AppServer {
         var server = JettyServerFactory.create(srvCfg, registry, json);
         server.start();
         server.await();
+    }
+
+    private static JettyServerConfig serverConfig(AppConfig appConfig) {
+        var envConfig = JettyServerConfig.fromEnv();
+        return new JettyServerConfig(
+            envConfig.host(),
+            appConfig.server().port(),
+            envConfig.maxThreads(),
+            envConfig.minThreads(),
+            envConfig.idleTimeoutMs(),
+            envConfig.threadPoolName(),
+            envConfig.environment(),
+            envConfig.acceptQueueSize(),
+            envConfig.reuseAddress(),
+            envConfig.stopAtShutdown(),
+            envConfig.stopTimeoutMs(),
+            envConfig.shutdownIdleTimeoutMs(),
+            envConfig.trustForwardHeaders(),
+            envConfig.forwardedOnly(),
+            envConfig.inputBufferSize(),
+            envConfig.outputBufferSize(),
+            envConfig.requestHeaderSize(),
+            envConfig.responseHeaderSize(),
+            envConfig.minRequestDataRate(),
+            envConfig.minResponseDataRate(),
+            envConfig.maxErrorDispatches(),
+            envConfig.maxUnconsumedRequestContentReads(),
+            envConfig.maxRequestBodyBytes(),
+            envConfig.maxResponseBodyBytes(),
+            envConfig.maxConcurrentRequests(),
+            envConfig.maxSuspendedRequests(),
+            envConfig.maxSuspendMs(),
+            envConfig.maxRequestsPerRemoteIp()
+        );
     }
 }

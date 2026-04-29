@@ -6,8 +6,10 @@ import dev.rafex.chat.auth.port.AuthPort;
 import dev.rafex.chat.auth.service.AuthServiceImpl;
 import dev.rafex.chat.chat.infra.ChatDb;
 import dev.rafex.chat.chat.infra.ConversationRepositoryImpl;
+import dev.rafex.chat.chat.infra.DeepseekAiGateway;
 import dev.rafex.chat.chat.infra.EchoAiGateway;
 import dev.rafex.chat.chat.infra.MessageRepositoryImpl;
+import dev.rafex.chat.chat.port.AiGateway;
 import dev.rafex.chat.chat.port.ChatService;
 import dev.rafex.chat.chat.service.ChatServiceImpl;
 import dev.rafex.chat.shared.config.AppConfig;
@@ -16,7 +18,6 @@ import dev.rafex.ether.jdbc.client.JdbcDatabaseClient;
 import dev.rafex.ether.jdbc.datasource.SimpleDataSource;
 import dev.rafex.ether.json.JsonCodecBuilder;
 import java.io.File;
-import java.util.Objects;
 import java.util.logging.Logger;
 
 public final class AppBootstrap implements AutoCloseable {
@@ -50,14 +51,26 @@ public final class AppBootstrap implements AutoCloseable {
         var userRepo = new UserRepositoryImpl(authDb);
         var convRepo = new ConversationRepositoryImpl(chatDb);
         var msgRepo  = new MessageRepositoryImpl(chatDb);
+        var json = JsonCodecBuilder.lenient().build();
 
         SeedUsers.seedIfAbsent(userRepo);
 
         AuthPort authPort = new AuthServiceImpl(userRepo, config.server());
-        ChatService chatService = new ChatServiceImpl(convRepo, msgRepo, new EchoAiGateway());
+        ChatService chatService = new ChatServiceImpl(convRepo, msgRepo, aiGateway(config, json));
 
-        var json = JsonCodecBuilder.lenient().build();
         return new AppBootstrap(closer, new AppContainer(authPort, chatService, json));
+    }
+
+    private static AiGateway aiGateway(AppConfig config, dev.rafex.ether.json.JsonCodec json) {
+        var ai = config.ai();
+        if (!"deepseek".equals(ai.provider())) {
+            return new EchoAiGateway();
+        }
+        if (ai.deepseekApiKey().isEmpty()) {
+            LOG.warning("AI_PROVIDER=deepseek but DEEPSEEK_API_KEY is missing. Falling back to EchoAiGateway.");
+            return new EchoAiGateway();
+        }
+        return new DeepseekAiGateway(json, ai.deepseekApiKey().get(), ai.deepseekModel(), ai.deepseekBaseUrl());
     }
 
     @Override
