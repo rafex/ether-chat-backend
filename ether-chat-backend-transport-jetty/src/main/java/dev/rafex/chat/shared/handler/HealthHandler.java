@@ -21,8 +21,18 @@ public final class HealthHandler extends Handler.Abstract.NonBlocking {
 
     @Override
     public boolean handle(Request request, Response response, Callback callback) {
+        response.getHeaders().put("Access-Control-Allow-Origin", "*");
+        response.getHeaders().put("Access-Control-Allow-Methods", "GET, OPTIONS");
+
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(204);
+            callback.succeeded();
+            return true;
+        }
         if (!"GET".equalsIgnoreCase(request.getMethod())) {
-            response.setStatus(405); callback.succeeded(); return true;
+            response.setStatus(405);
+            callback.succeeded();
+            return true;
         }
         var body = Map.of("status", "ok", "version", VERSION, "timestamp", Instant.now().toString());
         byte[] bytes = json.toJsonBytes(body);
