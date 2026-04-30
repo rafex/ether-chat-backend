@@ -35,6 +35,7 @@ java -jar ether-chat-backend-transport-jetty/target/ether-chat-backend-transport
 
 ```bash
 SERVER_PORT=8080
+WS_PORT=8081          # WebSocket /ws/chat (default SERVER_PORT+1)
 AUTH_DB_PATH=./data/auth.db
 CHAT_DB_PATH=./data/chat.db
 JWT_SECRET=supersecret-minimum-32-characters!
@@ -48,6 +49,7 @@ DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
 `JWT_SECRET` es requerido para login y endpoints protegidos.
 `AI_PROVIDER` soporta `echo|deepseek`.
 Si `AI_PROVIDER=deepseek` y falta `DEEPSEEK_API_KEY`, el backend hace fallback a `EchoAiGateway`.
+`WS_PORT` es el puerto del servidor WebSocket (default `SERVER_PORT + 1`).
 
 ## Usar la API (curl)
 
@@ -67,6 +69,23 @@ curl -X POST http://localhost:8080/api/chat/message \
   -d '{"message":"Hola","conversation_id":null}'
 ```
 
+## WebSocket (WS_PORT, default 8081)
+
+```bash
+# Conectar con wscat (npm i -g wscat)
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"demo","password":"password123"}' | jq -r '.token')
+
+wscat -c ws://localhost:8081/ws/chat \
+  -H "Authorization: Bearer ${TOKEN}"
+
+# Enviar mensaje (una vez conectado):
+{"message":"Hola","conversation_id":null}
+```
+
+Sin header: incluye `"token":"<jwt>"` en el primer mensaje JSON.
+
 ## OpenAPI y Postman
 
 1. Importa [`openapi/openapi.yaml`](./openapi/openapi.yaml) en Postman.
@@ -74,4 +93,4 @@ curl -X POST http://localhost:8080/api/chat/message \
 3. Ejecuta primero `POST /api/auth/login` y usa el `token`.
 4. Para `POST /api/chat/message`, envía `Authorization: Bearer <token>`.
 
-`8080` — configurable con `SERVER_PORT`.
+`8080` — configurable con `SERVER_PORT`. WebSocket en `WS_PORT` (default `8081`).

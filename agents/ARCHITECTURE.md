@@ -101,6 +101,21 @@ POST /api/chat/message  [Authorization: Bearer <token>]
     └─ responde {content, conversation_id}
 ```
 
+## Flujo principal: WebSocket chat
+
+```
+WS /ws/chat  [puerto WS_PORT, JWT via header o primer mensaje]
+  WebSocketChatHandler.onOpen()
+    └─ ether-jwt: verify(Authorization header)   [si presente]
+    └─ guarda userId como atributo de sesion
+  WebSocketChatHandler.onText(payload)
+    └─ si userId == null: intenta autenticar via campo "token" en payload
+    └─ si aun sin autenticar: cierra sesion con code 1008
+    └─ ChatService.sendMessage(userId, conversationId?, message)
+         └─ [mismo flujo que POST /api/chat/message]
+    └─ responde {content, conversation_id}
+```
+
 ## Inicializacion de SQLite WAL
 
 Cada modulo de base de datos ejecuta al arrancar:
@@ -118,6 +133,7 @@ PRAGMA foreign_keys=ON;
 | Variable | Default | Descripcion |
 |----------|---------|-------------|
 | `SERVER_PORT` | `8080` | Puerto HTTP |
+| `WS_PORT` | `SERVER_PORT + 1` | Puerto WebSocket (`/ws/chat`) |
 | `SERVER_SANDBOX` | `false` | `true` activa logging DEBUG |
 | `AUTH_DB_PATH` | `./data/auth.db` | Path del archivo SQLite de auth |
 | `CHAT_DB_PATH` | `./data/chat.db` | Path del archivo SQLite de chat |
@@ -149,8 +165,13 @@ POST /api/chat/message
 GET /health
   200:      { "status": "ok", "version": "string", "timestamp": "ISO-8601" }
 
-WS /ws/chat          [futuro — realtime MVP de SPEC-0004]
-  Headers:  Authorization: Bearer <token>
+WS /ws/chat          [puerto WS_PORT, default SERVER_PORT+1]
+  Handshake: Authorization: Bearer <token>  (o campo "token" en primer mensaje)
+  Entrada:   { "message": "string", "conversation_id": "string|null" }
+             { "token": "string", "message": "string", "conversation_id": "string|null" }
+  Salida:    { "content": "string", "conversation_id": "string" }
+  Error:     { "error": "string" }
+  1008:      JWT ausente o invalido
 ```
 
 ## Restricciones
