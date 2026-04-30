@@ -35,7 +35,7 @@ java -jar ether-chat-backend-transport-jetty/target/ether-chat-backend-transport
 
 ```bash
 SERVER_PORT=8080
-WS_PORT=8081          # WebSocket /ws/chat (default SERVER_PORT+1)
+WS_PORT=8081              # WebSocket /ws/chat (default SERVER_PORT+1)
 AUTH_DB_PATH=./data/auth.db
 CHAT_DB_PATH=./data/chat.db
 JWT_SECRET=supersecret-minimum-32-characters!
@@ -44,12 +44,16 @@ AI_PROVIDER=echo
 DEEPSEEK_API_KEY=
 DEEPSEEK_MODEL=deepseek-chat
 DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+CORS_ORIGIN=*             # Origen permitido (default: *; en prod: https://tu-frontend.com)
+AUTH_REQUIRED=true        # false = acepta peticiones sin token (modo público)
 ```
 
 `JWT_SECRET` es requerido para login y endpoints protegidos.
 `AI_PROVIDER` soporta `echo|deepseek`.
 Si `AI_PROVIDER=deepseek` y falta `DEEPSEEK_API_KEY`, el backend hace fallback a `EchoAiGateway`.
 `WS_PORT` es el puerto del servidor WebSocket (default `SERVER_PORT + 1`).
+`CORS_ORIGIN` controla el header `Access-Control-Allow-Origin` (default `*` para desarrollo).
+`AUTH_REQUIRED=false` permite usar `POST /api/chat/message` sin header `Authorization`.
 
 ## Usar la API (curl)
 

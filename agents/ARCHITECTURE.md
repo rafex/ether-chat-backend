@@ -134,6 +134,8 @@ PRAGMA foreign_keys=ON;
 |----------|---------|-------------|
 | `SERVER_PORT` | `8080` | Puerto HTTP |
 | `WS_PORT` | `SERVER_PORT + 1` | Puerto WebSocket (`/ws/chat`) |
+| `CORS_ORIGIN` | `*` | Valor de `Access-Control-Allow-Origin` |
+| `AUTH_REQUIRED` | `true` | `false` acepta `/api/chat/message` sin JWT |
 | `SERVER_SANDBOX` | `false` | `true` activa logging DEBUG |
 | `AUTH_DB_PATH` | `./data/auth.db` | Path del archivo SQLite de auth |
 | `CHAT_DB_PATH` | `./data/chat.db` | Path del archivo SQLite de chat |
@@ -151,19 +153,23 @@ Fuente de verdad para REST: `openapi/openapi.yaml`.
 ```
 POST /api/auth/login
   Body:     { "username": "string", "password": "string" }
-  200:      { "token": "string" }
-  400:      RFC 7807 — campos faltantes
-  401:      RFC 7807 — credenciales invalidas
+  200:      { "token": "string", "expires_at": "ISO-8601", "user_id": "string" }
+  400/401:  { "error": "descripcion" }
 
 POST /api/chat/message
-  Headers:  Authorization: Bearer <token>
+  Headers:  Authorization: Bearer <token>  (omitible si AUTH_REQUIRED=false)
   Body:     { "message": "string", "conversation_id": "string|null" }
   200:      { "content": "string", "conversation_id": "string" }
-  400:      RFC 7807 — mensaje faltante
-  401:      RFC 7807 — token invalido o ausente
+  400/401:  { "error": "descripcion" }
 
 GET /health
   200:      { "status": "ok", "version": "string", "timestamp": "ISO-8601" }
+
+CORS aplicado a todos los endpoints:
+  Access-Control-Allow-Origin:  <CORS_ORIGIN>
+  Access-Control-Allow-Headers: Content-Type, Authorization
+  Access-Control-Allow-Methods: POST/GET/OPTIONS (segun endpoint)
+  OPTIONS → 204 (preflight)
 
 WS /ws/chat          [puerto WS_PORT, default SERVER_PORT+1]
   Handshake: Authorization: Bearer <token>  (o campo "token" en primer mensaje)
