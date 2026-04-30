@@ -21,6 +21,8 @@ import java.util.logging.Logger;
 
 public final class ChatMessageHandler extends Handler.Abstract.NonBlocking {
     private static final Logger LOG = Logger.getLogger(ChatMessageHandler.class.getName());
+    private static final String GUEST_USER_ID = "guest";
+
     private final ChatService chatService;
     private final JsonCodec json;
     private final ServerConfig config;
@@ -33,18 +35,20 @@ public final class ChatMessageHandler extends Handler.Abstract.NonBlocking {
 
     @Override
     public boolean handle(Request request, Response response, Callback callback) {
+        applyCors(response);
+
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(204);
+            callback.succeeded();
+            return true;
+        }
         if (!"POST".equalsIgnoreCase(request.getMethod())) {
-            response.setStatus(405); callback.succeeded(); return true;
+            response.setStatus(405);
+            callback.succeeded();
+            return true;
         }
         try {
-            String token = extractBearerToken(request.getHeaders().get("Authorization"));
-            var kp = KeyProvider.hmac(config.jwtSecret());
-            var jc = JwtConfig.builder(kp).requireExpiration(false).requireSubject(true).build();
-            var result = new DefaultTokenVerifier(jc).verify(token, Instant.now());
-            if (!result.ok()) {
-                return error(response, callback, 401, "Token invalid or expired");
-            }
-            String userId = result.claims().get().subject();
+            String userId = resolveUserId(request);
 
             InputStream is = Request.asInputStream(request);
             var body = json.readValue(is, Map.class);
@@ -54,7 +58,10 @@ public final class ChatMessageHandler extends Handler.Abstract.NonBlocking {
                 return error(response, callback, 400, "message is required");
             }
             var chatResponse = chatService.sendMessage(userId, conversationId, message);
-            byte[] bytes = json.toJsonBytes(Map.of("content", chatResponse.content(), "conversation_id", chatResponse.conversationId()));
+            byte[] bytes = json.toJsonBytes(Map.of(
+                "content", chatResponse.content(),
+                "conversation_id", chatResponse.conversationId()
+            ));
             response.setStatus(200);
             response.getHeaders().put(HttpHeader.CONTENT_TYPE, "application/json");
             response.write(true, ByteBuffer.wrap(bytes), callback);
@@ -67,6 +74,26 @@ public final class ChatMessageHandler extends Handler.Abstract.NonBlocking {
             LOG.warning("Chat error: " + e.getMessage());
             return error(response, callback, 500, "Internal server error");
         }
+    }
+
+    private String resolveUserId(Request request) {
+        String authHeader = request.getHeaders().get("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring("Bearer ".length()).trim();
+            if (!token.isEmpty()) {
+                var kp = KeyProvider.hmac(config.jwtSecret());
+                var jc = JwtConfig.builder(kp).requireExpiration(false).requireSubject(true).build();
+                var result = new DefaultTokenVerifier(jc).verify(token, Instant.now());
+                if (!result.ok()) {
+                    throw new AppError.Unauthorized("Token invalid or expired");
+                }
+                return result.claims().get().subject();
+            }
+        }
+        if (!config.authRequired()) {
+            return GUEST_USER_ID;
+        }
+        throw new AppError.Unauthorized("Authorization header is required");
     }
 
     static String extractBearerToken(String authHeader) {
@@ -83,10 +110,16 @@ public final class ChatMessageHandler extends Handler.Abstract.NonBlocking {
         return token;
     }
 
-    private boolean error(Response response, Callback callback, int status, String detail) {
-        byte[] bytes = json.toJsonBytes(Map.of("status", status, "title", status == 400 ? "Bad Request" : status == 401 ? "Unauthorized" : "Error", "detail", detail));
+    private void applyCors(Response response) {
+        response.getHeaders().put("Access-Control-Allow-Origin", config.corsOrigin());
+        response.getHeaders().put("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        response.getHeaders().put("Access-Control-Allow-Methods", "POST, OPTIONS");
+    }
+
+    private boolean error(Response response, Callback callback, int status, String message) {
+        byte[] bytes = json.toJsonBytes(Map.of("error", message));
         response.setStatus(status);
-        response.getHeaders().put(HttpHeader.CONTENT_TYPE, "application/problem+json");
+        response.getHeaders().put(HttpHeader.CONTENT_TYPE, "application/json");
         response.write(true, ByteBuffer.wrap(bytes), callback);
         return true;
     }

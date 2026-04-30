@@ -36,7 +36,7 @@ public final class AppServer {
         var srvCfg = serverConfig(appConfig);
         var registry = new JettyRouteRegistry();
         registry.add("/health", new HealthHandler(json));
-        registry.add("/api/auth/login", new LoginHandler(container.authPort(), json));
+        registry.add("/api/auth/login", new LoginHandler(container.authPort(), json, serverConfig));
         registry.add("/api/chat/message", new ChatMessageHandler(container.chatService(), json, serverConfig));
         var server = JettyServerFactory.create(srvCfg, registry, json);
         server.start();

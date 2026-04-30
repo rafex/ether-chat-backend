@@ -46,7 +46,7 @@ public final class AuthServiceImpl implements AuthPort {
             .build();
         var token = new DefaultTokenIssuer(jc).issue(spec);
         var expiresAt = Instant.now().plusSeconds(config.jwtExpirySeconds()).toString();
-        return new Session(token, expiresAt);
+        return new Session(token, expiresAt, user.username());
     }
 
     public static boolean verifyPassword(String password, String stored) {
