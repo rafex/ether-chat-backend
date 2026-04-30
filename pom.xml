@@ -21,6 +21,7 @@
         <archunit.version>1.4.1</archunit.version>
         <slf4j.version>2.0.17</slf4j.version>
         <jetty.version>12.1.7</jetty.version>
+        <mockito.version>5.14.2</mockito.version>
     </properties>
     <modules>
         <module>ether-chat-backend-common</module>
@@ -55,6 +56,7 @@
             <dependency><groupId>com.tngtech.archunit</groupId><artifactId>archunit-junit5</artifactId><version>${archunit.version}</version><scope>test</scope></dependency>
             <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-jdk14</artifactId><version>${slf4j.version}</version></dependency>
             <dependency><groupId>org.eclipse.jetty</groupId><artifactId>jetty-server</artifactId><version>${jetty.version}</version></dependency>
+            <dependency><groupId>org.mockito</groupId><artifactId>mockito-core</artifactId><version>${mockito.version}</version><scope>test</scope></dependency>
         </dependencies>
     </dependencyManagement>
 </project>

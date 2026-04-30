@@ -13,12 +13,14 @@
         <dependency><groupId>dev.rafex.chat</groupId><artifactId>ether-chat-backend-bootstrap</artifactId></dependency>
         <dependency><groupId>dev.rafex.ether.http</groupId><artifactId>ether-http-jetty12</artifactId></dependency>
         <dependency><groupId>dev.rafex.ether.http</groupId><artifactId>ether-http-problem</artifactId></dependency>
+        <dependency><groupId>dev.rafex.ether.websocket</groupId><artifactId>ether-websocket-jetty12</artifactId></dependency>
         <dependency><groupId>dev.rafex.ether.json</groupId><artifactId>ether-json</artifactId></dependency>
         <dependency><groupId>dev.rafex.ether.jwt</groupId><artifactId>ether-jwt</artifactId></dependency>
         <dependency><groupId>dev.rafex.ether.config</groupId><artifactId>ether-config</artifactId></dependency>
         <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-jdk14</artifactId><scope>runtime</scope></dependency>
         <dependency><groupId>org.eclipse.jetty</groupId><artifactId>jetty-server</artifactId></dependency>
         <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
+        <dependency><groupId>org.mockito</groupId><artifactId>mockito-core</artifactId><scope>test</scope></dependency>
     </dependencies>
     <build>
         <plugins>
